@@ -1,0 +1,7 @@
+<routes>
+	<vType id="vtype0" accel="2.6" decel="4.5" sigma="0.5" length="2.5" minGap="2.5" maxSpeed="14" color="1,1,0"/>
+	<route id="route0" edges="0/0to1/0 1/0to1/1 1/1to1/2 1/2to2/2 2/2to2/1 2/1to1/1 1/1to0/1"/>
+	<stop lane="1/0to1/1" endPos="100" duration="100" parking="true"/>
+	<!-- route id="route0" edges="0/0to1/0 1/0to1/1 1/1to1/2 1/2to2/2 2/2to2/1 2/1to1/1 1/1to0/1 0/1to0/0"/ -->
+	<flow id="flow0" type="vtype0" route="route0" begin="0" period="1" number="2"/>
+</routes>

@@ -100,6 +100,7 @@ void BaseWaveApplLayer::initialize(int stage) {
                             << "This means that beacons are generated during SCH intervals" << std::endl;
                 }
                 firstBeacon = computeAsynchronousSendingTime(beaconInterval, type_CCH);
+
             }
 
             if (sendBeacons) {

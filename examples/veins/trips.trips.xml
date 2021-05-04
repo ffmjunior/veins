@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- generated on 2020-05-18 10:18:42.933110 by $Id$
+  options: <doubleminus>net-file=map00.net.xml <doubleminus>min-distance=600 <doubleminus>begin=0 <doubleminus>end=14 <doubleminus>route-file=map00.rou.xml
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <trip id="0" depart="0.00" from="0/0to1/0" to="1/1to1/2" via="2/0to1/0" />
+    <trip id="1" depart="1.00" from="1/2to2/2" to="1/0to0/0" via="2/0to1/0" />
+    <trip id="2" depart="2.00" from="0/2to1/2" to="1/0to2/0" via="2/2to2/1" />
+    <trip id="3" depart="3.00" from="2/2to2/1" to="1/1to1/2" via="2/0to1/0" />
+    <trip id="4" depart="4.00" from="0/2to0/1" to="0/2to1/2" via="2/0to2/1" />
+    <trip id="5" depart="5.00" from="0/0to1/0" to="0/1to0/0" via="2/1to2/0" />
+    <trip id="6" depart="6.00" from="1/0to0/0" to="0/0to1/0" via="0/2to0/1" />
+    <trip id="7" depart="7.00" from="0/1to0/0" to="0/1to0/0" via="2/0to2/1" />
+    <trip id="8" depart="8.00" from="1/0to0/0" to="1/0to0/0" via="1/2to2/2" />
+    <trip id="9" depart="9.00" from="2/2to2/1" to="1/2to2/2" via="2/0to2/1" />
+    <trip id="10" depart="10.00" from="2/0to1/0" to="2/2to2/1" via="0/0to1/0" />
+    <trip id="11" depart="11.00" from="0/1to0/0" to="1/0to2/0" via="2/2to1/2" />
+    <trip id="12" depart="12.00" from="2/1to2/0" to="2/1to2/2" via="0/2to1/2" />
+    <trip id="13" depart="13.00" from="0/1to0/2" to="1/1to1/0" via="2/2to2/1" />
+</routes>

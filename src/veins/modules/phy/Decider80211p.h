@@ -198,7 +198,7 @@ class Decider80211p: public BaseDecider {
 		              bool allowTxDuringRx,
 		              double centerFrequency,
 		              int myIndex = -1,
-		              bool collectCollisionStatistics = false,
+		              bool collectCollisionStatistics = true,
 		              bool debug = false):
 			BaseDecider(phy, sensitivity, myIndex, debug),
 			ccaThreshold(ccaThreshold),

@@ -29,6 +29,7 @@ void TraCIDemo11p::initialize(int stage) {
         lastDroveAt = simTime();
         currentSubscribedServiceId = -1;
     }
+    std::cout << "CAR ID " << myId <<  std::endl;
 }
 
 void TraCIDemo11p::onWSA(WaveServiceAdvertisment* wsa) {
@@ -44,7 +45,6 @@ void TraCIDemo11p::onWSA(WaveServiceAdvertisment* wsa) {
 
 void TraCIDemo11p::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
-
     if (mobility->getRoadId()[0] != ':') traciVehicle->changeRoute(wsm->getWsmData(), 9999);
     if (!sentMessage) {
         sentMessage = true;

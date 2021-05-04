@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 05/18/20 10:18:43 by SUMO duarouter Version 0.32.0
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="map00.net.xml"/>
+        <route-files value="trips.trips.xml"/>
+    </input>
+
+    <output>
+        <output-file value="map00.rou.xml"/>
+        <alternatives-output value="map00.rou.alt.xml"/>
+    </output>
+
+    <processing>
+        <ignore-errors value="true"/>
+    </processing>
+
+    <time>
+        <begin value="0.0"/>
+        <end value="14.0"/>
+    </time>
+
+    <report>
+        <no-warnings value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+</configuration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <vehicle id="0" depart="0.00">
+        <route edges="0/0to1/0 1/0to2/0 2/0to1/0 1/0to1/1 1/1to1/2"/>
+    </vehicle>
+    <vehicle id="1" depart="1.00">
+        <route edges="1/2to2/2 2/2to2/1 2/1to2/0 2/0to1/0 1/0to0/0"/>
+    </vehicle>
+    <vehicle id="2" depart="2.00">
+        <route edges="0/2to1/2 1/2to2/2 2/2to2/1 2/1to1/1 1/1to1/0 1/0to2/0"/>
+    </vehicle>
+    <vehicle id="3" depart="3.00">
+        <route edges="2/2to2/1 2/1to2/0 2/0to1/0 1/0to1/1 1/1to1/2"/>
+    </vehicle>
+    <vehicle id="4" depart="4.00">
+        <route edges="0/2to0/1 0/1to1/1 1/1to1/0 1/0to2/0 2/0to2/1 2/1to1/1 1/1to0/1 0/1to0/2 0/2to1/2"/>
+    </vehicle>
+    <vehicle id="5" depart="5.00">
+        <route edges="0/0to1/0 1/0to1/1 1/1to2/1 2/1to2/0 2/0to1/0 1/0to1/1 1/1to0/1 0/1to0/0"/>
+    </vehicle>
+    <vehicle id="6" depart="6.00">
+        <route edges="1/0to0/0 0/0to0/1 0/1to0/2 0/2to0/1 0/1to0/0 0/0to1/0"/>
+    </vehicle>
+    <vehicle id="7" depart="7.00">
+        <route edges="0/1to0/0 0/0to1/0 1/0to2/0 2/0to2/1 2/1to1/1 1/1to0/1 0/1to0/0"/>
+    </vehicle>
+    <vehicle id="8" depart="8.00">
+        <route edges="1/0to0/0 0/0to0/1 0/1to1/1 1/1to1/2 1/2to2/2 2/2to1/2 1/2to1/1 1/1to1/0 1/0to0/0"/>
+    </vehicle>
+    <vehicle id="9" depart="9.00">
+        <route edges="2/2to2/1 2/1to2/0 2/0to2/1 2/1to1/1 1/1to1/2 1/2to2/2"/>
+    </vehicle>
+    <vehicle id="10" depart="10.00">
+        <route edges="2/0to1/0 1/0to0/0 0/0to1/0 1/0to1/1 1/1to1/2 1/2to2/2 2/2to2/1"/>
+    </vehicle>
+    <vehicle id="11" depart="11.00">
+        <route edges="0/1to0/0 0/0to0/1 0/1to1/1 1/1to1/2 1/2to2/2 2/2to1/2 1/2to1/1 1/1to1/0 1/0to2/0"/>
+    </vehicle>
+    <vehicle id="12" depart="12.00">
+        <route edges="2/1to2/0 2/0to1/0 1/0to1/1 1/1to0/1 0/1to0/2 0/2to1/2 1/2to1/1 1/1to2/1 2/1to2/2"/>
+    </vehicle>
+    <vehicle id="13" depart="13.00">
+        <route edges="0/1to0/2 0/2to1/2 1/2to2/2 2/2to2/1 2/1to1/1 1/1to1/0"/>
+    </vehicle>
+</routes>

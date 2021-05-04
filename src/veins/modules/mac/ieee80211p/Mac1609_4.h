@@ -59,260 +59,309 @@
  * @see Decider80211p
  */
 
-class Mac1609_4 : public BaseMacLayer,
-	public WaveAppToMac1609_4Interface {
+class Mac1609_4 : public BaseMacLayer, public WaveAppToMac1609_4Interface
+{
 
-	public:
+public:
 
-		// Access categories in increasing order of priority (see IEEE Std 802.11-2012, Table 9-1)
-		enum t_access_category {
-			AC_BK = 0,
-			AC_BE = 1,
-			AC_VI = 2,
-			AC_VO = 3
-		};
+  // Access categories in increasing order of priority (see IEEE Std 802.11-2012, Table 9-1)
+  enum t_access_category
+  {
+    AC_BK = 0, AC_BE = 1, AC_VI = 2, AC_VO = 3
+  };
 
-		class EDCA {
-			public:
-				class EDCAQueue {
-					public:
+  class EDCA
+  {
+  public:
+    class EDCAQueue
+    {
+    public:
 
-						std::queue<WaveShortMessage*> queue;
-						int aifsn; //number of aifs slots for this queue
-						int cwMin; //minimum contention window
-						int cwMax; //maximum contention size
-						int cwCur; //current contention window
-						int64_t currentBackoff; //current Backoff value for this queue
-						bool txOP;
-						int ssrc; // station short retry count
-						int slrc; // station long retry count
-						bool waitForAck; // true if the queue is waiting for an acknowledgment for unicast
-						unsigned long waitOnUnicastID; // unique id of unicast on which station is waiting
-						AckTimeOutMessage* ackTimeOut; // timer for retransmission on receiving no ACK
+      std::queue<WaveShortMessage*> queue;
+      int aifsn; //number of aifs slots for this queue
+      int cwMin; //minimum contention window
+      int cwMax; //maximum contention size
+      int cwCur; //current contention window
+      int64_t currentBackoff; //current Backoff value for this queue
+      bool txOP;
+      int ssrc; // station short retry count
+      int slrc; // station long retry count
+      bool waitForAck; // true if the queue is waiting for an acknowledgment for unicast
+      unsigned long waitOnUnicastID; // unique id of unicast on which station is waiting
+      AckTimeOutMessage *ackTimeOut; // timer for retransmission on receiving no ACK
 
-						EDCAQueue() {	};
-						EDCAQueue(int aifsn,int cwMin, int cwMax, t_access_category ac):aifsn(aifsn),cwMin(cwMin),cwMax(cwMax),cwCur(cwMin),currentBackoff(0),txOP(false),ssrc(0),slrc(0),waitForAck(false),waitOnUnicastID(-1) {
-							ackTimeOut = new AckTimeOutMessage("AckTimeOut");
-							ackTimeOut->setKind(ac);
-						};
-				};
+      EDCAQueue ()
+      {
+      }
+      EDCAQueue (int aifsn, int cwMin, int cwMax, t_access_category ac);
+      ~EDCAQueue ();
+    };
 
-				EDCA(cModule *owner, t_channel channelType,int maxQueueLength = 0):owner(owner),maxQueueSize(maxQueueLength),channelType(channelType) {
-					statsNumInternalContention = 0;
-					statsNumBackoff = 0;
-					statsSlotsBackoff = 0;
-				};
-				const cObject *getThisPtr() const  {return NULL;}
-				const char *getClassName() const {return "Mac1609_4::EDCA"; }
-				void createQueue(int aifsn, int cwMin, int cwMax,t_access_category);
-				int queuePacket(t_access_category AC,WaveShortMessage* cmsg);
-				void backoff(t_access_category ac);
-				simtime_t startContent(simtime_t idleSince, bool guardActive);
-				void stopContent(bool allowBackoff, bool generateTxOp);
-				void postTransmit(t_access_category, WaveShortMessage* wsm, bool useAcks);
-				void revokeTxOPs();
+    EDCA (cSimpleModule *owner, t_channel channelType, int maxQueueLength = 0);
+    ~EDCA ();
+    const cObject*
+    getThisPtr () const
+    {
+      return nullptr;
+    }
+    const char*
+    getClassName () const
+    {
+      return "Mac1609_4::EDCA";
+    }
+    void
+    createQueue (int aifsn, int cwMin, int cwMax, t_access_category);
+    int
+    queuePacket (t_access_category AC, WaveShortMessage *cmsg);
+    void
+    backoff (t_access_category ac);
+    simtime_t
+    startContent (simtime_t idleSince, bool guardActive);
+    void
+    stopContent (bool allowBackoff, bool generateTxOp);
+    void
+    postTransmit (t_access_category, WaveShortMessage *wsm, bool useAcks);
+    void
+    revokeTxOPs ();
 
-				void cleanUp();
+    /** @brief return the next packet to send, send all lower Queues into backoff */
+    WaveShortMessage*
+    initiateTransmit (simtime_t idleSince);
 
-				/** @brief return the next packet to send, send all lower Queues into backoff */
-				WaveShortMessage* initiateTransmit(simtime_t idleSince);
+  public:
+    cSimpleModule *owner;
+    std::map<t_access_category, EDCAQueue> myQueues;
+    uint32_t maxQueueSize;
+    simtime_t lastStart; //when we started the last contention;
+    t_channel channelType;
 
-			public:
-				cModule *owner;
-				std::map<t_access_category,EDCAQueue> myQueues;
-				uint32_t maxQueueSize;
-				simtime_t lastStart; //when we started the last contention;
-				t_channel channelType;
+    /** @brief Stats */
+    long statsNumInternalContention;
+    long statsNumBackoff;
+    long statsSlotsBackoff;
 
-				/** @brief Stats */
-				long statsNumInternalContention;
-				long statsNumBackoff;
-				long statsSlotsBackoff;
+    /** @brief Id for debug messages */
+    std::string myId;
+  };
 
-				/** @brief Id for debug messages */
-				std::string myId;
-		};
+public:
+  Mac1609_4 () :
+      nextChannelSwitch (nullptr), nextMacEvent (nullptr)
+  {
+  }
+  ~Mac1609_4 ();
 
-	public:
-		Mac1609_4() : nextChannelSwitch(nullptr), nextMacEvent(nullptr) {}
-		~Mac1609_4();
+  /**
+   * @brief return true if alternate access is enabled
+   */
+  bool
+  isChannelSwitchingActive ();
 
-		/**
-		 * @brief return true if alternate access is enabled
-		 */
-		bool isChannelSwitchingActive();
+  simtime_t
+  getSwitchingInterval ();
 
-		simtime_t getSwitchingInterval();
+  bool
+  isCurrentChannelCCH ();
 
-		bool isCurrentChannelCCH();
+  void
+  changeServiceChannel (int channelNumber);
 
-		void changeServiceChannel(int channelNumber);
+  /**
+   * @brief Change the default tx power the NIC card is using
+   *
+   * @param txPower_mW the tx power to be set in mW
+   */
+  void
+  setTxPower (double txPower_mW);
 
-		/**
-		 * @brief Change the default tx power the NIC card is using
-		 *
-		 * @param txPower_mW the tx power to be set in mW
-		 */
-		void setTxPower(double txPower_mW);
+  /**
+   * @brief Change the default MCS the NIC card is using
+   *
+   * @param mcs the default modulation and coding scheme
+   * to use
+   */
+  void
+  setMCS (enum PHY_MCS mcs);
 
-		/**
-		 * @brief Change the default MCS the NIC card is using
-		 *
-		 * @param mcs the default modulation and coding scheme
-		 * to use
-		 */
-		void setMCS(enum PHY_MCS mcs);
+  /**
+   * @brief Change the phy layer carrier sense threshold.
+   *
+   * @param ccaThreshold_dBm the cca threshold in dBm
+   */
+  void
+  setCCAThreshold (double ccaThreshold_dBm);
 
-		/**
-		 * @brief Change the phy layer carrier sense threshold.
-		 *
-		 * @param ccaThreshold_dBm the cca threshold in dBm
-		 */
-		void setCCAThreshold(double ccaThreshold_dBm);
+protected:
+  /** @brief States of the channel selecting operation.*/
 
-	protected:
-		/** @brief States of the channel selecting operation.*/
+protected:
+  /** @brief Initialization of the module and some variables.*/
+  virtual void
+  initialize (int);
 
-	protected:
-		/** @brief Initialization of the module and some variables.*/
-		virtual void initialize(int);
+  /** @brief Delete all dynamically allocated objects of the module.*/
+  virtual void
+  finish ();
 
-		/** @brief Delete all dynamically allocated objects of the module.*/
-		virtual void finish();
+  /** @brief Handle messages from lower layer.*/
+  virtual void
+  handleLowerMsg (cMessage*);
 
-		/** @brief Handle messages from lower layer.*/
-		virtual void handleLowerMsg(cMessage*);
+  /** @brief Handle messages from upper layer.*/
+  virtual void
+  handleUpperMsg (cMessage*);
 
-		/** @brief Handle messages from upper layer.*/
-		virtual void handleUpperMsg(cMessage*);
+  /** @brief Handle control messages from upper layer.*/
+  virtual void
+  handleUpperControl (cMessage *msg);
 
-		/** @brief Handle control messages from upper layer.*/
-		virtual void handleUpperControl(cMessage* msg);
+  /** @brief Handle self messages such as timers.*/
+  virtual void
+  handleSelfMsg (cMessage*);
 
+  /** @brief Handle control messages from lower layer.*/
+  virtual void
+  handleLowerControl (cMessage *msg);
 
-		/** @brief Handle self messages such as timers.*/
-		virtual void handleSelfMsg(cMessage*);
+  /** @brief Set a state for the channel selecting operation.*/
+  void
+  setActiveChannel (t_channel state);
 
-		/** @brief Handle control messages from lower layer.*/
-		virtual void handleLowerControl(cMessage* msg);
+  void
+  sendFrame (Mac80211Pkt *frame, omnetpp::simtime_t delay, double frequency,
+	     uint64_t datarate, double txPower_mW);
 
-		/** @brief Set a state for the channel selecting operation.*/
-		void setActiveChannel(t_channel state);
+  simtime_t
+  timeLeftInSlot () const;
+  simtime_t
+  timeLeftTillGuardOver () const;
 
-		void sendFrame(Mac80211Pkt* frame, omnetpp::simtime_t delay, double frequency, uint64_t datarate, double txPower_mW);
+  bool
+  guardActive () const;
 
-		simtime_t timeLeftInSlot() const;
-		simtime_t timeLeftTillGuardOver() const;
+  void
+  attachSignal (Mac80211Pkt *mac, simtime_t startTime, double frequency,
+		uint64_t datarate, double txPower_mW);
+  Signal*
+  createSignal (simtime_t start, simtime_t length, double power,
+		uint64_t bitrate, double frequency);
 
-		bool guardActive() const;
+  /** @brief maps a application layer priority (up) to an EDCA access category. */
+  t_access_category
+  mapUserPriority (int prio);
 
-		void attachSignal(Mac80211Pkt* mac, simtime_t startTime, double frequency, uint64_t datarate, double txPower_mW);
-		Signal* createSignal(simtime_t start, simtime_t length, double power, uint64_t bitrate, double frequency);
+  void
+  channelBusy ();
+  void
+  channelBusySelf (bool generateTxOp);
+  void
+  channelIdle (bool afterSwitch = false);
 
-		/** @brief maps a application layer priority (up) to an EDCA access category. */
-		t_access_category mapUserPriority(int prio);
+  void
+  setParametersForBitrate (uint64_t bitrate);
 
-		void channelBusy();
-		void channelBusySelf(bool generateTxOp);
-		void channelIdle(bool afterSwitch = false);
+  simtime_t
+  getFrameDuration (int payloadLengthBits,
+		    enum PHY_MCS mcs = MCS_DEFAULT) const;
 
-		void setParametersForBitrate(uint64_t bitrate);
+  void
+  sendAck (int recpAddress, unsigned long wsmId);
+  void
+  handleUnicast (std::unique_ptr<WaveShortMessage> wsm);
+  void
+  handleAck (const Mac80211Ack *ack);
+  void
+  handleAckTimeOut (AckTimeOutMessage *ackTimeOutMsg);
+  void
+  handleRetransmit (t_access_category ac);
+protected:
+  /** @brief Self message to indicate that the current channel shall be switched.*/
+  cMessage *nextChannelSwitch;
 
-		simtime_t getFrameDuration(int payloadLengthBits, enum PHY_MCS mcs = MCS_DEFAULT) const;
+  /** @brief Self message to wake up at next MacEvent */
+  cMessage *nextMacEvent;
 
-		void sendAck(int recpAddress, unsigned long wsmId);
-		void handleUnicast(std::unique_ptr<WaveShortMessage> wsm);
-		void handleAck(const Mac80211Ack* ack);
-		void handleAckTimeOut(AckTimeOutMessage* ackTimeOutMsg);
-		void handleRetransmit(t_access_category ac);
-	protected:
-		/** @brief Self message to indicate that the current channel shall be switched.*/
-		cMessage* nextChannelSwitch;
+  /** @brief Last time the channel went idle */
+  simtime_t lastIdle;
+  simtime_t lastBusy;
 
-		/** @brief Self message to wake up at next MacEvent */
-		cMessage* nextMacEvent;
+  /** @brief Current state of the channel selecting operation.*/
+  t_channel activeChannel;
 
-		/** @brief Last time the channel went idle */
-		simtime_t lastIdle;
-		simtime_t lastBusy;
+  /** @brief access category of last sent packet */
+  t_access_category lastAC;
 
-		/** @brief Current state of the channel selecting operation.*/
-		t_channel activeChannel;
+  /** @brief pointer to last sent packet */
+  WaveShortMessage *lastWSM;
 
-		/** @brief access category of last sent packet */
-		t_access_category lastAC;
+  /** @brief pointer to last sent mac frame */
+  std::unique_ptr<Mac80211Pkt> lastMac;
 
-		/** @brief pointer to last sent packet */
-		WaveShortMessage* lastWSM;
+  /** @brief Stores the frequencies in Hz that are associated to the channel numbers.*/
+  std::map<int, double> frequency;
 
-		/** @brief pointer to last sent mac frame */
-		std::unique_ptr<Mac80211Pkt> lastMac;
+  int headerLength;
 
-		/** @brief Stores the frequencies in Hz that are associated to the channel numbers.*/
-		std::map<int,double> frequency;
+  bool useSCH;
+  int mySCH;
 
-		int headerLength;
+  std::map<t_channel, std::unique_ptr<EDCA>> myEDCA;
 
-		bool useSCH;
-		int mySCH;
+  bool idleChannel;
 
-		std::map<t_channel,EDCA*> myEDCA;
+  /** @brief stats */
+  long statsReceivedPackets;
+  long statsReceivedBroadcasts;
+  long statsSentPackets;
+  long statsSentAcks;
+  long statsTXRXLostPackets;
+  long statsSNIRLostPackets;
+  long statsDroppedPackets;
+  long statsNumTooLittleTime;
+  long statsNumInternalContention;
+  long statsNumBackoff;
+  long statsSlotsBackoff;
+  simtime_t statsTotalBusyTime;
 
-		bool idleChannel;
+  /** @brief This MAC layers MAC address.*/
+  int myMacAddress;
 
-		/** @brief stats */
-		long statsReceivedPackets;
-		long statsReceivedBroadcasts;
-		long statsSentPackets;
-		long statsSentAcks;
-		long statsTXRXLostPackets;
-		long statsSNIRLostPackets;
-		long statsDroppedPackets;
-		long statsNumTooLittleTime;
-		long statsNumInternalContention;
-		long statsNumBackoff;
-		long statsSlotsBackoff;
-		simtime_t statsTotalBusyTime;
+  /** @brief The power (in mW) to transmit with.*/
+  double txPower;
 
-		/** @brief This MAC layers MAC address.*/
-		int myMacAddress;
+  /** @brief the bit rate at which we transmit */
+  uint64_t bitrate;
 
-		/** @brief The power (in mW) to transmit with.*/
-		double txPower;
+  /** @brief N_DBPS, derived from bitrate, for frame length calculation */
+  double n_dbps;
 
-		/** @brief the bit rate at which we transmit */
-		uint64_t bitrate;
+  /** @brief Id for debug messages */
+  std::string myId;
 
-		/** @brief N_DBPS, derived from bitrate, for frame length calculation */
-		double n_dbps;
+  bool useAcks;
+  double ackErrorRate;
+  int dot11RTSThreshold;
+  int dot11ShortRetryLimit;
+  int dot11LongRetryLimit;
+  int ackLength;
 
-		/** @brief Id for debug messages */
-		std::string myId;
+  // indicates rx start within the period of ACK timeout
+  bool rxStartIndication;
 
-		bool useAcks;
-		double ackErrorRate;
-		int dot11RTSThreshold;
-		int dot11ShortRetryLimit;
-		int dot11LongRetryLimit;
-		int ackLength;
+  // An ack is sent after SIFS irrespective of the channel state
+  cMessage *stopIgnoreChannelStateMsg;
+  bool ignoreChannelState;
 
-		// indicates rx start within the period of ACK timeout
-		bool rxStartIndication;
+  // Dont start contention immediately after finishing unicast TX. Wait until ack timeout/ ack Rx
+  bool waitUntilAckRXorTimeout;
+  std::set<unsigned long> handledUnicastToApp;
 
-		// An ack is sent after SIFS irrespective of the channel state
-		cMessage* stopIgnoreChannelStateMsg;
-		bool ignoreChannelState;
+  Mac80211pToPhy11pInterface *phy11p;
 
-		// Dont start contention immediately after finishing unicast TX. Wait until ack timeout/ ack Rx
-		bool waitUntilAckRXorTimeout;
-		std::set<unsigned long> handledUnicastToApp;
-
-		Mac80211pToPhy11pInterface* phy11p;
-
-		//tell to anybody which is interested when the channel turns busy or idle
-		simsignal_t sigChannelBusy;
-		//tell to anybody which is interested when a collision occurred
-		simsignal_t sigCollision;
+  //tell to anybody which is interested when the channel turns busy or idle
+  simsignal_t sigChannelBusy;
+  //tell to anybody which is interested when a collision occurred
+  simsignal_t sigCollision;
 };
 
 #endif /* ___MAC1609_4_H_*/
